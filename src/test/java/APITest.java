@@ -3,6 +3,8 @@ import io.restassured.response.Response;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+import static org.hamcrest.Matchers.equalTo;
+
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -38,14 +40,19 @@ public class APITest {
                 .when()
                 .post("users/add");
 
-        // Assert the status code
-        Assert.assertEquals(response.statusCode(), 201);
 
-                //.getBody().asString()); //
-        // Print the response body
-        System.out.println(response.getBody().asString());
-        ID = response.jsonPath().getString("id");
-        System.out.println(ID);
+        // Assertions
+        Assert.assertEquals(response.statusCode(), 201);
+        response.then().assertThat().body("firstName", equalTo("ali"));
+        response.then().assertThat().body("lastName", equalTo("khan"));
+        response.then().assertThat().body("age", equalTo("31"));
+
+
+//         For dynamic
+//        System.out.println(response.getBody().asString());
+//        ID = response.jsonPath().getString("id");
+
+
     }
 
     @Test
@@ -60,8 +67,11 @@ public class APITest {
         //However, since this is a dummy API with preset data, we're retrieving an existing user with a hardcoded ID (1).
 
 
-        System.out.println(response.getBody().asString());
+
         Assert.assertEquals(response.statusCode(), 200);
+        response.then().assertThat().body("firstName", equalTo("Emily"));
+        response.then().assertThat().body("lastName", equalTo("Johnson"));
+        response.then().assertThat().body("age", equalTo(28));
 
     }
 
@@ -72,30 +82,33 @@ public class APITest {
         Response response = given()
                 .when()
                 .contentType("application/json")
-                .body(userData)
+                .body("{\"firstName\":\"Hadi\"}")
                 .put("users/1");
 
         Assert.assertEquals(response.statusCode(), 200);
-
+        response.then().assertThat().body("firstName", equalTo("Hadi"));
 
     }
     @Test
     public void updateUserUsingPATCH()  {
-        System.out.println();
+
+//        Map<String, String> userData = new HashMap<>();
+//        userData.put("firstName", "Hadi");
 
         Response response = given()
                 .when()
                 .contentType("application/json")
-               .body(userData)
+               // .body(userData)
+                .body("{\"firstName\":\"Hadi\"}")
                 .patch("users/1");
 
         Assert.assertEquals(response.statusCode(), 200);
-
+        response.then().assertThat().body("firstName", equalTo("Hadi"));
 
     }
     @Test
     public void DeleteUser()  {
-        System.out.println();
+
 
         Response response = given()
                 .when()

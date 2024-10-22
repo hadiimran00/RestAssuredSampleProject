@@ -1,13 +1,7 @@
 {
-  "creationData": {
-    "firstname": "hadi",
-    "lastname": "imran",
-    "age": "23"
-  },
-  "updationData": {
-    "firstname": "ali",
-    "lastname": "khan",
+    "firstName": "ali",
+    "lastName": "khan",
     "age": "31"
   }
-}
+
 
