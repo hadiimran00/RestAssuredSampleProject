@@ -2,6 +2,7 @@ import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 import static org.hamcrest.Matchers.equalTo;
 
@@ -20,6 +21,14 @@ public class APITest {
     String userDataFilePath = "src/test/resources/Data.json";
 
 
+    @DataProvider(name = "GETreqData")
+    public static Object[][] dataProvider() {
+        return new Object[][]{
+                {"1","Emily","Johnson",28},
+                {"2","Michael","Williams",35},
+                {"3","Sophia","Brown",42}
+        };
+    }
 
 
     @BeforeClass
@@ -48,30 +57,22 @@ public class APITest {
         response.then().assertThat().body("age", equalTo("31"));
 
 
-//         For dynamic
-//        System.out.println(response.getBody().asString());
-//        ID = response.jsonPath().getString("id");
-
 
     }
 
-    @Test
-    public void getRequest()  {
+    @Test(dataProvider = "GETreqData")
+    public void getRequest(String ID,String firstName,String lastName,Integer age)  {
 
         Response response = given()
                 .when()
-                .get("users/1");
-
-            //  .get("/users/"+ID);
-            // We could use "/users/" + ID to get the user we created earlier in the test.
-        //However, since this is a dummy API with preset data, we're retrieving an existing user with a hardcoded ID (1).
+                .get("users/"+ID);
 
 
 
         Assert.assertEquals(response.statusCode(), 200);
-        response.then().assertThat().body("firstName", equalTo("Emily"));
-        response.then().assertThat().body("lastName", equalTo("Johnson"));
-        response.then().assertThat().body("age", equalTo(28));
+        response.then().assertThat().body("firstName", equalTo(firstName));
+        response.then().assertThat().body("lastName", equalTo(lastName));
+        response.then().assertThat().body("age", equalTo(age));
 
     }
 
