@@ -1,4 +1,6 @@
 import io.restassured.RestAssured;
+import io.restassured.builder.RequestSpecBuilder;
+import io.restassured.specification.RequestSpecification;
 import io.restassured.response.Response;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
@@ -14,11 +16,19 @@ import java.nio.file.Paths;
 import static io.restassured.RestAssured.given;
 
 public class APITest {
+    private static RequestSpecification requestSpec;
+    private static String userData;
 
-    private String baseUri = "https://dummyjson.com/";
-  private String userData;
-    private String ID;
-    String userDataFilePath = "src/test/resources/Data.json";
+    @BeforeClass
+    public static void createRequestSpecification() throws IOException {
+        requestSpec = new RequestSpecBuilder().
+                setBaseUri("https://dummyjson.com/")
+                .setContentType("application/json").
+                build();
+
+        String userDataFilePath = "src/test/resources/Data.json";
+        userData = Files.readString(Paths.get(userDataFilePath));
+    }
 
 
     @DataProvider(name = "GETreqData")
@@ -30,21 +40,11 @@ public class APITest {
         };
     }
 
-
-    @BeforeClass
-    public void setUp() throws IOException {
-        RestAssured.baseURI = baseUri;
-        // Read the JSON file as a String
-        userData = Files.readString(Paths.get(userDataFilePath));
-
-
-    }
     @Test
     public void UserPOSTrequest()  {
 
         // Send a POST request with the request body from the file
-        Response response = given()
-                .contentType("application/json")
+        Response response = given(requestSpec)
                 .body(userData)
                 .when()
                 .post("users/add");
@@ -63,7 +63,7 @@ public class APITest {
     @Test(dataProvider = "GETreqData")
     public void getRequest(String ID,String firstName,String lastName,Integer age)  {
 
-        Response response = given()
+        Response response = given(requestSpec)
                 .when()
                 .get("users/"+ID);
 
@@ -80,9 +80,8 @@ public class APITest {
     public void UpdateUserUsingPUT()  {
         System.out.println();
 
-        Response response = given()
+        Response response = given(requestSpec)
                 .when()
-                .contentType("application/json")
                 .body("{\"firstName\":\"Hadi\"}")
                 .put("users/1");
 
@@ -96,9 +95,7 @@ public class APITest {
 //        Map<String, String> userData = new HashMap<>();
 //        userData.put("firstName", "Hadi");
 
-        Response response = given()
-                .when()
-                .contentType("application/json")
+        Response response = given(requestSpec)
                // .body(userData)
                 .body("{\"firstName\":\"Hadi\"}")
                 .patch("users/1");
@@ -111,9 +108,8 @@ public class APITest {
     public void DeleteUser()  {
 
 
-        Response response = given()
+        Response response = given(requestSpec)
                 .when()
-                .contentType("application/json")
                 .delete("users/1");
 
         Assert.assertEquals(response.statusCode(), 200);
